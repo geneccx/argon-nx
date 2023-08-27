@@ -1,16 +1,9 @@
 version: '3'
 services:
-  gui:
-    build: argon-nx-gui
-    volumes:
-    - ./output:/output
   first-stage:
-    build: argon-first-stage
+    container_name: first-stage
+    image: devkitpro/devkitarm:20190212
+    command: "bash -c 'cd /argon-first-stage && make clean && make'"
     volumes:
     - ./output:/output
-  minerva:
-    build: modules/minerva
-    volumes:
-    - ./output:/output
-volumes:
-  output: {}
+    - ./argon-first-stage/:/argon-first-stage

@@ -29,6 +29,7 @@
 #include "utils/util.h"
 #include "utils/fs_utils.h"
 #include "utils/btn.h"
+#include "utils/dirlist.h"
 
 #include "power/max17050.h"
 
@@ -69,27 +70,18 @@ void ipl_main()
     display_backlight_pwm_init();
     display_backlight_brightness(100, 1000);
 
-    
     bpmp_clk_rate_set(BPMP_CLK_SUPER_BOOST);
     
     /* Mount Sd card and launch payload */
     if (sd_mount())
-    {  
-
-        u8* splash = sd_file_read("argon/splash.bmp");
-        if (splash)
-        {
-            gfx_render_splash(splash);
-            display_init_framebuffer();
-            msleep(1000);
-        } 
-        else 
-        {
-            error_end("No splash found\n");
+    {
+        char* payloads = dirlist("", "hekate_ctcaer_*.bin", false);
+        if (payloads && payloads[0]) {
+            launch_payload(&payloads[0]);
+            error_end("Failed to launch payload...\n");
         }
 
-        launch_payload("argon/sys/argon-nx-gui.bin");
-        error_end("Fail chainloading GUI\n");
+        error_end("No payload found...\n");
     } else {
         error_end("No sd card found...\n");
     }
